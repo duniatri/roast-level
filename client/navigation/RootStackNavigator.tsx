@@ -15,6 +15,7 @@ export type RootStackParamList = {
   Main: undefined;
   Results: {
     imageUri: string;
+    imageBase64: string;
     result: AnalysisResult;
   };
 };
