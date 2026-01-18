@@ -69,6 +69,7 @@ export default function AnalysisScreen({ navigation }: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.navigate("Results", {
         imageUri: imageData?.uri,
+        imageBase64: imageData?.base64,
         result: data,
       });
     },

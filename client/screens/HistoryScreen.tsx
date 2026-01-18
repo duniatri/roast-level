@@ -24,7 +24,7 @@ import emptyHistoryImage from "../../assets/images/empty-history.png";
 
 interface HistoryItem {
   id: string;
-  imageUri: string;
+  imageBase64: string;
   roastLevel: string;
   temperature: string;
   temperatureRange: string;
@@ -118,7 +118,7 @@ export default function HistoryScreen() {
         ]}
       >
         <Image
-          source={{ uri: item.imageUri }}
+          source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
           style={styles.thumbnail}
           resizeMode="cover"
         />

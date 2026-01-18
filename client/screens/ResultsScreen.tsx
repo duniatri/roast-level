@@ -20,7 +20,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 
 interface HistoryItem {
   id: string;
-  imageUri: string;
+  imageBase64: string;
   roastLevel: string;
   temperature: string;
   temperatureRange: string;
@@ -50,7 +50,7 @@ export default function ResultsScreen({ route, navigation }: any) {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { theme, isDark } = useTheme();
-  const { imageUri, result } = route.params;
+  const { imageUri, imageBase64, result } = route.params;
 
   const roastColor = getRoastColor(result.roastLevel);
 
@@ -62,7 +62,7 @@ export default function ResultsScreen({ route, navigation }: any) {
       
       const newItem: HistoryItem = {
         id: Date.now().toString(),
-        imageUri,
+        imageBase64,
         roastLevel: result.roastLevel,
         temperature: result.temperature,
         temperatureRange: result.temperatureRange,
