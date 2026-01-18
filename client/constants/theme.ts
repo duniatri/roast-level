@@ -1,30 +1,39 @@
 import { Platform } from "react-native";
 
-const tintColorLight = "#007AFF";
-const tintColorDark = "#0A84FF";
-
 export const Colors = {
   light: {
-    text: "#11181C",
+    text: "#2C1810",
+    textSecondary: "#6B5D54",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
-    link: "#007AFF",
-    backgroundRoot: "#FFFFFF", // Elevation 0
-    backgroundDefault: "#F2F2F2", // Elevation 1
-    backgroundSecondary: "#E6E6E6", // Elevation 2
-    backgroundTertiary: "#D9D9D9", // Elevation 3
+    tabIconDefault: "#6B5D54",
+    tabIconSelected: "#6B4423",
+    link: "#6B4423",
+    backgroundRoot: "#F8F5F0",
+    backgroundDefault: "#FFFFFF",
+    backgroundSecondary: "#EDE6DD",
+    backgroundTertiary: "#E5DED5",
+    primary: "#6B4423",
+    secondary: "#A67C52",
+    success: "#4A7C59",
+    error: "#C1440E",
+    border: "#D4C9BE",
   },
   dark: {
-    text: "#ECEDEE",
+    text: "#F5F0EB",
+    textSecondary: "#A99F96",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-    link: "#0A84FF",
-    backgroundRoot: "#1F2123", // Elevation 0
-    backgroundDefault: "#2A2C2E", // Elevation 1
-    backgroundSecondary: "#353739", // Elevation 2
-    backgroundTertiary: "#404244", // Elevation 3
+    tabIconDefault: "#8B8178",
+    tabIconSelected: "#D4A574",
+    link: "#D4A574",
+    backgroundRoot: "#1A1412",
+    backgroundDefault: "#252019",
+    backgroundSecondary: "#302820",
+    backgroundTertiary: "#3D332A",
+    primary: "#D4A574",
+    secondary: "#A67C52",
+    success: "#6B9B7A",
+    error: "#E07050",
+    border: "#4A3F35",
   },
 };
 
@@ -93,13 +102,9 @@ export const Typography = {
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: "system-ui",
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: "ui-serif",
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: "ui-rounded",
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: "ui-monospace",
   },
   default: {

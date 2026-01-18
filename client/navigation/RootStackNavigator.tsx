@@ -1,12 +1,22 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MainTabNavigator from "@/navigation/MainTabNavigator";
-import ModalScreen from "@/screens/ModalScreen";
+import ResultsScreen from "@/screens/ResultsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
+
+interface AnalysisResult {
+  roastLevel: string;
+  temperature: string;
+  temperatureRange: string;
+  notes: string;
+}
 
 export type RootStackParamList = {
   Main: undefined;
-  Modal: undefined;
+  Results: {
+    imageUri: string;
+    result: AnalysisResult;
+  };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -22,11 +32,11 @@ export default function RootStackNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Modal"
-        component={ModalScreen}
+        name="Results"
+        component={ResultsScreen}
         options={{
           presentation: "modal",
-          headerTitle: "Modal",
+          headerTitle: "Analysis Results",
         }}
       />
     </Stack.Navigator>
