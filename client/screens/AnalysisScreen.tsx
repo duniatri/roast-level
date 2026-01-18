@@ -21,7 +21,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, Colors } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
 import placeholderImage from "../../assets/images/placeholder-photo.png";
@@ -33,24 +33,29 @@ interface AnalysisResult {
   notes: string;
 }
 
+interface ImageData {
+  uri: string;
+  base64: string;
+}
+
 export default function AnalysisScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { theme, isDark } = useTheme();
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageData, setImageData] = useState<ImageData | null>(null);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [showCamera, setShowCamera] = useState(false);
   const cameraRef = React.useRef<CameraView>(null);
 
   const analysisMutation = useMutation({
-    mutationFn: async (imageUri: string) => {
+    mutationFn: async (base64Image: string) => {
       const baseUrl = getApiUrl();
       const response = await fetch(new URL("/api/analyze", baseUrl).href, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ imageUri }),
+        body: JSON.stringify({ imageBase64: base64Image }),
       });
 
       if (!response.ok) {
@@ -63,7 +68,7 @@ export default function AnalysisScreen({ navigation }: any) {
     onSuccess: (data) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.navigate("Results", {
-        imageUri: selectedImage,
+        imageUri: imageData?.uri,
         result: data,
       });
     },
@@ -94,10 +99,13 @@ export default function AnalysisScreen({ navigation }: any) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const photo = await cameraRef.current.takePictureAsync({
         base64: true,
-        quality: 0.8,
+        quality: 0.7,
       });
-      if (photo) {
-        setSelectedImage(photo.uri);
+      if (photo && photo.base64) {
+        setImageData({
+          uri: photo.uri,
+          base64: photo.base64,
+        });
         setShowCamera(false);
       }
     }
@@ -109,25 +117,28 @@ export default function AnalysisScreen({ navigation }: any) {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.8,
+      quality: 0.7,
       base64: true,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      setSelectedImage(result.assets[0].uri);
+    if (!result.canceled && result.assets[0] && result.assets[0].base64) {
+      setImageData({
+        uri: result.assets[0].uri,
+        base64: result.assets[0].base64,
+      });
     }
   };
 
   const handleAnalyze = () => {
-    if (selectedImage) {
+    if (imageData?.base64) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      analysisMutation.mutate(selectedImage);
+      analysisMutation.mutate(imageData.base64);
     }
   };
 
   const handleClearImage = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedImage(null);
+    setImageData(null);
   };
 
   if (showCamera) {
@@ -181,10 +192,10 @@ export default function AnalysisScreen({ navigation }: any) {
             },
           ]}
         >
-          {selectedImage ? (
+          {imageData ? (
             <View style={styles.imageWrapper}>
               <Image
-                source={{ uri: selectedImage }}
+                source={{ uri: imageData.uri }}
                 style={styles.selectedImage}
                 resizeMode="cover"
               />
@@ -242,7 +253,7 @@ export default function AnalysisScreen({ navigation }: any) {
             <ThemedText style={styles.buttonText}>Choose from Gallery</ThemedText>
           </Pressable>
 
-          {selectedImage ? (
+          {imageData ? (
             <Pressable
               style={({ pressed }) => [
                 styles.analyzeButton,

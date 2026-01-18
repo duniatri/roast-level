@@ -1,10 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
-import * as fs from "fs";
-import * as path from "path";
 
 interface AnalyzeRequest {
-  imageUri: string;
+  imageBase64: string;
 }
 
 interface AnalysisResult {
@@ -45,6 +43,10 @@ Respond in this exact JSON format:
   "notes": "brief 1-2 sentence brewing tip specific to this roast level for Aeropress"
 }`;
 
+  const imageUrl = imageBase64.startsWith("data:")
+    ? imageBase64
+    : `data:image/jpeg;base64,${imageBase64}`;
+
   try {
     const response = await fetch("https://api.abacus.ai/v0/chat/completions", {
       method: "POST",
@@ -65,9 +67,7 @@ Respond in this exact JSON format:
               {
                 type: "image_url",
                 image_url: {
-                  url: imageBase64.startsWith("data:")
-                    ? imageBase64
-                    : `data:image/jpeg;base64,${imageBase64}`,
+                  url: imageUrl,
                 },
               },
             ],
@@ -104,37 +104,15 @@ Respond in this exact JSON format:
   }
 }
 
-async function getBase64FromUri(imageUri: string): Promise<string> {
-  if (imageUri.startsWith("data:")) {
-    return imageUri;
-  }
-
-  if (imageUri.startsWith("file://")) {
-    const filePath = imageUri.replace("file://", "");
-    const buffer = fs.readFileSync(filePath);
-    return `data:image/jpeg;base64,${buffer.toString("base64")}`;
-  }
-
-  if (imageUri.startsWith("http")) {
-    const response = await fetch(imageUri);
-    const buffer = await response.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString("base64");
-    return `data:image/jpeg;base64,${base64}`;
-  }
-
-  return imageUri;
-}
-
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/analyze", async (req: Request, res: Response) => {
     try {
-      const { imageUri } = req.body as AnalyzeRequest;
+      const { imageBase64 } = req.body as AnalyzeRequest;
 
-      if (!imageUri) {
-        return res.status(400).json({ error: "Image URI is required" });
+      if (!imageBase64) {
+        return res.status(400).json({ error: "Image data is required" });
       }
 
-      const imageBase64 = await getBase64FromUri(imageUri);
       const result = await analyzeWithAbacus(imageBase64);
 
       return res.json(result);
