@@ -61,6 +61,13 @@ const formatDate = (dateString: string): string => {
   });
 };
 
+/**
+ * Screen component that displays persisted coffee roast analyses and allows pull-to-refresh and deletion of entries.
+ *
+ * Loads history entries from persistent storage and renders them as a scrollable list with an empty state and loading UI.
+ *
+ * @returns A JSX element rendering the History screen
+ */
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
