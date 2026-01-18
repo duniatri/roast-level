@@ -38,6 +38,14 @@ interface ImageData {
   base64: string;
 }
 
+/**
+ * Screen for capturing or selecting a photo and obtaining a coffee roast analysis.
+ *
+ * Renders UI for taking a photo or choosing one from the gallery, requests camera permissions when needed, uploads the selected image to the analysis API, and navigates to the "Results" screen with `imageUri`, `imageBase64`, and the analysis `result` on success.
+ *
+ * @param navigation - Navigation prop used to navigate to other screens (navigates to "Results" with `{ imageUri, imageBase64, result }` on successful analysis)
+ * @returns A React element rendering the analysis screen UI
+ */
 export default function AnalysisScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();

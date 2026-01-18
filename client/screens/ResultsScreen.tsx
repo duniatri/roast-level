@@ -46,6 +46,20 @@ const getRoastColor = (roastLevel: string): string => {
   return "#8B6914";
 };
 
+/**
+ * Render the results screen that displays an analyzed roast image, brewing recommendations, and actions.
+ *
+ * Expects route.params to include:
+ * - imageUri: a URI used to display the captured image.
+ * - imageBase64: a base64-encoded image string used when saving history.
+ * - result: an object containing `roastLevel`, `temperature`, `temperatureRange`, and `notes`.
+ *
+ * The screen lets the user save the result to persistent history (stores a HistoryItem under HISTORY_KEY and navigates back)
+ * or analyze another image (navigates back). Both actions trigger haptic feedback.
+ *
+ * @param route - Navigation route containing the required `params` described above.
+ * @returns The rendered Results screen component.
+ */
 export default function ResultsScreen({ route, navigation }: any) {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
