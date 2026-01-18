@@ -52,6 +52,13 @@ function setupCors(app: express.Application) {
   });
 }
 
+/**
+ * Configure request body parsing middleware on the provided Express application.
+ *
+ * Installs JSON and URL-encoded body parsers with a 10 MB limit. The JSON parser
+ * stores the raw request buffer on `req.rawBody` for later use. The URL-encoded
+ * parser is configured with `extended: false`.
+ */
 function setupBodyParsing(app: express.Application) {
   app.use(
     express.json({
@@ -65,6 +72,13 @@ function setupBodyParsing(app: express.Application) {
   app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 }
 
+/**
+ * Adds middleware that logs HTTP requests under /api including method, path, status code, duration, and response JSON payload (truncated to 80 characters).
+ *
+ * Captures response bodies sent via `res.json` and logs them alongside method, path, status, and elapsed time. Only requests whose path starts with `/api` are logged.
+ *
+ * @param app - The Express application to attach the middleware to
+ */
 function setupRequestLogging(app: express.Application) {
   app.use((req, res, next) => {
     const start = Date.now();
