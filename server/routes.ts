@@ -12,6 +12,19 @@ interface AnalysisResult {
   notes: string;
 }
 
+/**
+ * Analyzes a coffee beans image to determine roast level and Aeropress temperature guidance.
+ *
+ * Sends the provided image to the Abacus routing LLM and returns a structured analysis containing
+ * roast category, a recommended midpoint temperature in Celsius, the full temperature range, and a
+ * short brewing note specific to Aeropress.
+ *
+ * @param imageBase64 - A base64-encoded image string or a data URL (e.g., starting with `data:`). If a raw base64 payload is provided, it will be treated as a JPEG.
+ * @returns An object with `roastLevel` (category name), `temperature` (midpoint in Celsius), `temperatureRange` (full range), and `notes` (1–2 sentence brewing tip).
+ * @throws Error if the `ABACUS_API_KEY` environment variable is not configured.
+ * @throws Error if the Abacus API responds with a non-OK status.
+ * @throws Error if the Abacus API response is missing or cannot be parsed as the expected JSON object.
+ */
 async function analyzeWithAbacus(imageBase64: string): Promise<AnalysisResult> {
   const apiKey = process.env.ABACUS_API_KEY;
 
