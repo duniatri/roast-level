@@ -48,14 +48,14 @@ Respond in this exact JSON format:
     : `data:image/jpeg;base64,${imageBase64}`;
 
   try {
-    const response = await fetch("https://api.abacus.ai/v0/chat/completions", {
+    const response = await fetch("https://routellm.abacus.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "openai/gpt-4o-mini",
         messages: [
           {
             role: "user",
