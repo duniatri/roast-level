@@ -55,7 +55,7 @@ Respond in this exact JSON format:
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "user",
