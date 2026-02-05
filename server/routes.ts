@@ -18,6 +18,33 @@ const openai = new OpenAI({
   apiKey: process.env.ABACUS_API_KEY,
 });
 
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retries = 2,
+  timeoutMs = 15000
+): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+      return response;
+    } catch (err) {
+      clearTimeout(id);
+      if (attempt === retries) throw err;
+      console.warn(`Retrying Abacus request (${attempt + 1}/${retries})`);
+    }
+  }
+
+  throw new Error("Unreachable");
+}
+
 async function analyzeWithAbacus(imageBase64: string): Promise<AnalysisResult> {
   const apiKey = process.env.ABACUS_API_KEY;
 
@@ -53,41 +80,47 @@ Respond in this exact JSON format:
     ? imageBase64
     : `data:image/jpeg;base64,${imageBase64}`;
 
+  // Add image size guard
+  const base64SizeKB = Math.ceil((imageBase64.length * 3) / 4 / 1024);
+
+  if (base64SizeKB > 4500) {
+    throw new Error(
+      `Image too large (${base64SizeKB}KB). Please use a smaller image.`
+    );
+  }
+
   try {
-    const response = await fetch("https://routellm.abacus.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompt,
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: imageUrl,
+    const response = await fetchWithRetry(
+      "https://routellm.abacus.ai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "route-llm",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                {
+                  type: "image_url",
+                  image_url: { url: imageUrl },
                 },
-              },
-            ],
-          },
-        ],
-        max_tokens: 500,
-        temperature: 0.3,
-      }),
-    });
+              ],
+            },
+          ],
+          max_tokens: 500,
+          temperature: 0.3,
+        }),
+      }
+    );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Abacus API error:", errorText);
-      throw new Error(`Abacus API error: ${response.status}`);
+      const text = await response.text();
+      throw new Error(`RouteLLM error ${response.status}: ${text}`);
     }
 
     const data = await response.json();
@@ -126,6 +159,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Analysis error:", error);
       const message = error instanceof Error ? error.message : "Analysis failed";
       return res.status(500).json({ error: message });
+    }
+  });
+
+  app.get("/api/health/abacus", async (_req, res) => {
+    try {
+      const response = await fetchWithRetry(
+        "https://routellm.abacus.ai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${process.env.ABACUS_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "route-llm",
+            messages: [{ role: "user", content: "ping" }],
+            max_tokens: 1,
+          }),
+        },
+        0,
+        5000
+      );
+
+      if (!response.ok) {
+        return res.status(503).json({ status: "down" });
+      }
+
+      return res.json({ status: "ok" });
+    } catch {
+      return res.status(503).json({ status: "down" });
     }
   });
 
