@@ -18,6 +18,13 @@ const openai = new OpenAI({
   apiKey: process.env.ABACUS_API_KEY,
 });
 
+/**
+ * Analyze a base64-encoded image of coffee beans and classify its roast level with Aeropress temperature guidance.
+ *
+ * @param imageBase64 - A base64-encoded image or data URI of the coffee beans; if not a data URI, `data:image/jpeg;base64,` will be prefixed.
+ * @returns An object containing `roastLevel`, `temperature` (midpoint in °C), `temperatureRange`, and brief `notes` for Aeropress brewing.
+ * @throws Error if the ABACUS_API_KEY environment variable is not configured, if the Abacus API returns no content, or if the API response cannot be parsed as the expected JSON.
+ */
 async function analyzeWithAbacus(imageBase64: string): Promise<AnalysisResult> {
   if (!process.env.ABACUS_API_KEY) {
     throw new Error("ABACUS_API_KEY is not configured");
@@ -86,6 +93,14 @@ Respond in this exact JSON format:
   }
 }
 
+/**
+ * Register API routes on the provided Express application, including the POST /api/analyze endpoint.
+ *
+ * The POST /api/analyze route expects a JSON body with `imageBase64`, validates its presence,
+ * invokes the analysis routine, and responds with the analysis result or an error status.
+ *
+ * @returns An HTTP Server instance created from the provided Express app
+ */
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/analyze", async (req: Request, res: Response) => {
     try {
