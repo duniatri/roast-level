@@ -19,7 +19,9 @@ const openai = new OpenAI({
 });
 
 async function analyzeWithAbacus(imageBase64: string): Promise<AnalysisResult> {
-  if (!process.env.ABACUS_API_KEY) {
+  const apiKey = process.env.ABACUS_API_KEY;
+
+  if (!apiKey) {
     throw new Error("ABACUS_API_KEY is not configured");
   }
 
@@ -52,22 +54,44 @@ Respond in this exact JSON format:
     : `data:image/jpeg;base64,${imageBase64}`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "route-llm",
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: prompt },
-            { type: "image_url", image_url: { url: imageUrl } },
-          ],
-        },
-      ],
-      max_tokens: 500,
-      temperature: 0.3,
+    const response = await fetch("https://routellm.abacus.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: prompt,
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageUrl,
+                },
+              },
+            ],
+          },
+        ],
+        max_tokens: 500,
+        temperature: 0.3,
+      }),
     });
 
-    const content = response.choices?.[0]?.message?.content;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Abacus API error:", errorText);
+      throw new Error(`Abacus API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
       throw new Error("No response from Abacus API");
