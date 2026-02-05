@@ -12,7 +12,7 @@ interface AnalysisResult {
   notes: string;
 }
 
-async function analyzeWithAbacus(imageBase64: string): Promise<AnalysisResult> {
+async function analyzeWithAbacus(imageBase64: string): Promise&lt;AnalysisResult&gt; {
   const apiKey = process.env.ABACUS_API_KEY;
 
   if (!apiKey) {
@@ -55,7 +55,7 @@ Respond in this exact JSON format:
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "route-llm",
         messages: [
           {
             role: "user",
@@ -104,8 +104,8 @@ Respond in this exact JSON format:
   }
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  app.post("/api/analyze", async (req: Request, res: Response) => {
+export async function registerRoutes(app: Express): Promise&lt;Server&gt; {
+  app.post("/api/analyze", async (req: Request, res: Response) =&gt; {
     try {
       const { imageBase64 } = req.body as AnalyzeRequest;
 
