@@ -1,6 +1,5 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
-import OpenAI from "openai";
 
 interface AnalyzeRequest {
   imageBase64: string;
@@ -12,11 +11,6 @@ interface AnalysisResult {
   temperatureRange: string;
   notes: string;
 }
-
-const openai = new OpenAI({
-  baseURL: "https://routellm.abacus.ai/v1",
-  apiKey: process.env.ABACUS_API_KEY,
-});
 
 async function fetchWithRetry(
   url: string,
